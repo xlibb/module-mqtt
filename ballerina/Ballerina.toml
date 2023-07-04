@@ -5,7 +5,9 @@ version = "0.0.1"
 authors = ["xlibb"]
 keywords = ["mqtt"]
 repository = "https://github.com/xlibb/module-mqtt"
+#license = ["Apache-2.0"]
 distribution = "2201.6.0"
+#icon = "icon.png"
 
 [[platform.java11.dependency]]
 groupId = "io.xlibb"
