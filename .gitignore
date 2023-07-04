@@ -1,0 +1,34 @@
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+
+# IDEA Files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# MacOS
+*.DS_Store
+
+# Ballerina
+velocity.log*
+*Ballerina.lock
+
+# VSCode
+.vscode
+.project
+.settings/
+ballerina/.project
+ballerina/.settings/
+build-config/checkstyle/.classpath
+build-config/checkstyle/.project
+build-config/checkstyle/.settings/
+native/.classpath
+native/.project
+native/.settings/
+test-utils/.classpath
+test-utils/.project
+test-utils/.settings/
