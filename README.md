@@ -1,13 +1,13 @@
-# Ballerina Mqtt Library
+# Ballerina MQTT Library
 
-This package provides an implementation to interact with Mqtt servers via Mqtt client and listener.
+This package provides an implementation to interact with MQTT servers via MQTT client and listener.
 
 MQTT is a lightweight, publish-subscribe, machine to machine network protocol for message queue/message queuing service.
 
 ### Publisher and subscriber
-#### Mqtt publisher
-A Mqtt publisher is a Mqtt client that publishes messages to the Mqtt server. When working with a Mqtt client, the first thing to do is to initialize the client.
-For the publisher to work successfully, an active Mqtt server should be available.
+#### MQTT publisher
+A MQTT publisher is a MQTT client that publishes messages to the MQTT server. When working with a MQTT client, the first thing to do is to initialize the client.
+For the publisher to work successfully, an active MQTT server should be available.
 
 The code snippet given below initializes a publisher client with the basic configuration.
 ```ballerina
@@ -23,13 +23,13 @@ mqtt:ClientConfiguration clientConfiguration = {
 
 mqtt:Client mqttClient = check new (mqtt:DEFAULT_URL, uuid:createType1AsString(), clientConfiguration); // A unique id needs to be provided as the client id
 ```
-Using the `publish` api of this client, messages can be sent to the Mqtt server.
+Using the `publish` api of this client, messages can be sent to the MQTT server.
 ```ballerina
-check mqttClient->publish("mqtt/test", {payload: "This is Ballerina Mqtt client!!!".toBytes()});
+check mqttClient->publish("mqtt/test", {payload: "This is Ballerina MQTT client!!!".toBytes()});
 ```
-#### Mqtt subscriber
-A Mqtt subscriber is a client responsible for reading messages from one or more topics in the server. When working with a Mqtt subscriber, the first thing to do is initialize the subscriber.
-For the subscriber to work successfully, an active Mqtt server should be available.
+#### MQTT subscriber
+A MQTT subscriber is a client responsible for reading messages from one or more topics in the server. When working with a MQTT subscriber, the first thing to do is initialize the subscriber.
+For the subscriber to work successfully, an active MQTT server should be available.
 
 The code snippet given below initializes a subscriber with the basic configuration.
 ```ballerina

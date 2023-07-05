@@ -1,11 +1,11 @@
 ## Overview
-This module provides an implementation to interact with Mqtt servers via Mqtt client and listener.
+This module provides an implementation to interact with MQTT servers via MQTT client and listener.
 
 MQTT is a lightweight, publish-subscribe, machine to machine network protocol for message queue/message queuing service.
 
 ### Publisher and subscriber
-#### Mqtt publisher
-A Mqtt publisher is a Mqtt client that publishes messages to the Mqtt server. When working with a Mqtt client, the first thing to do is to initialize the client.
+#### MQTT publisher
+A MQTT publisher is a Mqtt client that publishes messages to the Mqtt server. When working with a Mqtt client, the first thing to do is to initialize the client.
 For the publisher to work successfully, an active Mqtt server should be available.
 
 The code snippet given below initializes a publisher client with the basic configuration.
