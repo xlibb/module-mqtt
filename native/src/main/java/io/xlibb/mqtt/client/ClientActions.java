@@ -12,33 +12,34 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
-import java.util.UUID;
+import static io.xlibb.mqtt.utils.MqttUtils.createMqttError;
+import static io.xlibb.mqtt.utils.MqttUtils.getMqttConnectOptions;
 
+/**
+ * Class containing the external methods of the publisher.
+ */
 public class ClientActions {
 
-    public static Object externInit(BObject clientObject) {
+    public static Object externInit(BObject clientObject, BString serverUri, BString clientId,
+                                    BMap<BString, Object> clientConfiguration) {
         try {
-            IMqttClient publisher = new MqttClient("tcp://localhost:1883",
-                    UUID.randomUUID().toString(), new MemoryPersistence());
-            MqttConnectOptions options = new MqttConnectOptions();
-            options.setAutomaticReconnect(true);
-            options.setCleanSession(true);
-            options.setConnectionTimeout(10);
+            IMqttClient publisher = new MqttClient(serverUri.getValue(), clientId.getValue(), new MemoryPersistence());
+            MqttConnectOptions options = getMqttConnectOptions(clientConfiguration);
             publisher.connect(options);
             clientObject.addNativeData("clientObject", publisher);
         } catch (MqttException e) {
-            e.printStackTrace();
+            return createMqttError(e);
         }
         return null;
     }
 
     public static Object externPublish(BObject clientObject, BString topic, BMap message) {
         IMqttClient publisher = (IMqttClient) clientObject.getNativeData("clientObject");
-        byte[] payload = ((BArray)message.get(StringUtils.fromString("payload"))).getByteArray();
+        MqttMessage mqttMessage = generateMqttMessage(message);
         try {
-            publisher.publish(topic.getValue(), new MqttMessage(payload));
+            publisher.publish(topic.getValue(), mqttMessage);
         } catch (MqttException e) {
-            e.printStackTrace();
+            return createMqttError(e);
         }
         return null;
     }
@@ -48,7 +49,7 @@ public class ClientActions {
         try {
             publisher.close();
         } catch (MqttException e) {
-            e.printStackTrace();
+            return createMqttError(e);
         }
         return null;
     }
@@ -63,7 +64,7 @@ public class ClientActions {
         try {
             publisher.disconnect();
         } catch (MqttException e) {
-            e.printStackTrace();
+            return createMqttError(e);
         }
         return null;
     }
@@ -73,8 +74,16 @@ public class ClientActions {
         try {
             publisher.reconnect();
         } catch (MqttException e) {
-            e.printStackTrace();
+            return createMqttError(e);
         }
         return null;
+    }
+
+    private static MqttMessage generateMqttMessage(BMap message) {
+        MqttMessage mqttMessage = new MqttMessage();
+        mqttMessage.setPayload(((BArray) message.get(StringUtils.fromString("payload"))).getByteArray());
+        mqttMessage.setQos(((Long) message.get(StringUtils.fromString("qos"))).intValue());
+        mqttMessage.setRetained(((boolean) message.get(StringUtils.fromString("retained"))));
+        return mqttMessage;
     }
 }

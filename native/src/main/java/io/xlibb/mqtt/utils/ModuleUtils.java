@@ -3,10 +3,11 @@ package io.xlibb.mqtt.utils;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Module;
 
+/**
+ * Class holding module related utility functions.
+ */
 public class ModuleUtils {
-    /**
-     * Mqtt library package ID.
-     */
+
     private static Module mqttModule = null;
 
     private ModuleUtils() {

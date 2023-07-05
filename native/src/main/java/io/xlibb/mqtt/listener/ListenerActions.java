@@ -11,6 +11,11 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import java.util.UUID;
 
+import static io.xlibb.mqtt.utils.MqttUtils.createMqttError;
+
+/**
+ * Class containing the external methods of the listener.
+ */
 public class ListenerActions {
 
     public static Object externInit(BObject clientObject) {
@@ -24,7 +29,7 @@ public class ListenerActions {
             publisher.connect(options);
             clientObject.addNativeData("clientObject", publisher);
         } catch (MqttException e) {
-            e.printStackTrace();
+            return createMqttError(e);
         }
         return null;
     }
@@ -41,7 +46,7 @@ public class ListenerActions {
         try {
             publisher.disconnect();
         } catch (MqttException e) {
-            e.printStackTrace();
+            return createMqttError(e);
         }
         clientObject.addNativeData("service", null);
         return null;
@@ -52,7 +57,7 @@ public class ListenerActions {
         try {
             subscriber.subscribe(topics.getStringArray());
         } catch (MqttException e) {
-            e.printStackTrace();
+            return createMqttError(e);
         }
         return null;
     }
@@ -62,7 +67,7 @@ public class ListenerActions {
         try {
             publisher.disconnect();
         } catch (MqttException e) {
-            e.printStackTrace();
+            return createMqttError(e);
         }
         clientObject.addNativeData("service", null);
         return null;
@@ -73,7 +78,7 @@ public class ListenerActions {
         try {
             publisher.disconnectForcibly();
         } catch (MqttException e) {
-            e.printStackTrace();
+            return createMqttError(e);
         }
         clientObject.addNativeData("service", null);
         return null;

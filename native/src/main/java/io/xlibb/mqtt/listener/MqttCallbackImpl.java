@@ -19,6 +19,9 @@ import java.util.concurrent.TimeUnit;
 
 import static io.xlibb.mqtt.utils.ModuleUtils.getModule;
 
+/**
+ * Class containing the callback of Mqtt subscriber.
+ */
 public class MqttCallbackImpl implements MqttCallback {
 
     private final Runtime runtime;

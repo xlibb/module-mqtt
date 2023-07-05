@@ -5,6 +5,9 @@ import io.ballerina.runtime.api.values.BError;
 
 import java.util.concurrent.CountDownLatch;
 
+/**
+ * Class containing the callback of onMessage service function.
+ */
 public class BServiceInvokeCallbackImpl implements Callback {
 
     private final CountDownLatch countDownLatch;

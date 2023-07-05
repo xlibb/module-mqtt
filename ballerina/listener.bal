@@ -1,18 +1,14 @@
 import ballerina/jballerina.java;
 
-# Represents a Kafka consumer endpoint.
+# Represents a Mqtt listener endpoint.
 #
-# + consumerConfig - Stores configurations related to a Kafka connection
 public isolated client class Listener {
 
     private final string[] & readonly topics;
 
-    # Creates a new `kafka:Listener`.
+    # Creates a new `mqtt:Listener`.
     #
-    # + bootstrapServers - List of remote server endpoints of Kafka brokers
-    # + config - Configurations related to the consumer endpoint
-    # + return - A `kafka:Error` if an error is encountered or else '()'
-    public isolated function init(string|string[] topics) returns Error? {
+    public isolated function init(string serverUri, string clientId, string|string[] topics, *ConnectionConfiguration config) returns Error? {
         if topics is string {
             self.topics = [topics];
         } else {
@@ -31,34 +27,34 @@ public isolated client class Listener {
     # error? result = listener.'start();
     # ```
     #
-    # + return - A `kafka:Error` if an error is encountered while starting the server or else `()`
+    # + return - A `error` if an error is encountered while starting the server or else `()`
     public isolated function 'start() returns error? {
         check self.externStart(self.topics);
     };
 
-    public isolated function externStart(string[] topics) returns error? =
+    private isolated function externStart(string[] topics) returns error? =
     @java:Method {
         'class: "io.xlibb.mqtt.listener.ListenerActions"
     } external;
 
-    # Stops the Kafka listener gracefully.
+    # Stops the Mqtt listener gracefully.
     # ```ballerina
     # error? result = listener.gracefulStop();
     # ```
     #
-    # + return - A `kafka:Error` if an error is encountered during the listener-stopping process or else `()`
+    # + return - A `error` if an error is encountered during the listener-stopping process or else `()`
     public isolated function gracefulStop() returns error?  =
     @java:Method {
         name: "externGracefulStop",
         'class: "io.xlibb.mqtt.listener.ListenerActions"
     } external;
 
-    # Stops the kafka listener immediately.
+    # Stops the mqtt listener immediately.
     # ```ballerina
     # error? result = listener.immediateStop();
     # ```
     #
-    # + return - A `kafka:Error` if an error is encountered during the listener-stopping process or else `()`
+    # + return - A `error` if an error is encountered during the listener-stopping process or else `()`
     public isolated function immediateStop() returns error? =
     @java:Method {
         name: "externImmediateStop",
@@ -67,12 +63,12 @@ public isolated client class Listener {
 
     # Attaches a service to the listener.
     # ```ballerina
-    # error? result = listener.attach(kafkaService);
+    # error? result = listener.attach(mqttService);
     # ```
     #
     # + 'service - The service to be attached
     # + name - Name of the service
-    # + return - A `kafka:Error` if an error is encountered while attaching the service or else `()`
+    # + return - A `error` if an error is encountered while attaching the service or else `()`
     public isolated function attach(Service 'service, string[]|string? name = ()) returns error? =
     @java:Method {
         name: "externAttach",
@@ -81,11 +77,11 @@ public isolated client class Listener {
 
     # Detaches a consumer service from the listener.
     # ```ballerina
-    # error? result = listener.detach(kafkaService);
+    # error? result = listener.detach(mqttService);
     # ```
     #
     # + 'service - The service to be detached
-    # + return - A `kafka:Error` if an error is encountered while detaching a service or else `()`
+    # + return - A `error` if an error is encountered while detaching a service or else `()`
     public isolated function detach(Service 'service) returns error? =
     @java:Method {
         name: "externDetach",
