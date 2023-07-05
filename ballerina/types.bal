@@ -42,5 +42,5 @@ public type DeliveryToken record {|
     string[] topics;
 |};
 
-# The Mqtt service type.
+# The MQTT service type.
 public type Service distinct service object {};

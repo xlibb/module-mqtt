@@ -1,6 +1,6 @@
 import ballerina/jballerina.java;
 
-# Represents a Mqtt listener endpoint.
+# Represents a MQTT listener endpoint.
 #
 public isolated client class Listener {
 
@@ -37,7 +37,7 @@ public isolated client class Listener {
         'class: "io.xlibb.mqtt.listener.ListenerActions"
     } external;
 
-    # Stops the Mqtt listener gracefully.
+    # Stops the MQTT listener gracefully.
     # ```ballerina
     # error? result = listener.gracefulStop();
     # ```
