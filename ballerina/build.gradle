@@ -148,7 +148,7 @@ publishing {
 updateTomlFiles.dependsOn copyStdlibs
 
 test.dependsOn startMqttServer
-test.finalizedBy stopMqttServer
+build.finalizedBy stopMqttServer
 
 build.dependsOn ":mqtt-native:build"
 build.dependsOn "generatePomFileForMavenPublication"
