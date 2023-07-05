@@ -8,7 +8,7 @@ public isolated client class Listener {
 
     # Creates a new `mqtt:Listener`.
     #
-    public isolated function init(string serverUri, string clientId, string|string[] topics, *ClientConfiguration config) returns Error? {
+    public isolated function init(string serverUri, string clientId, string|string[] topics, *ListenerConfiguration config) returns Error? {
         if topics is string {
             self.topics = [topics];
         } else {
@@ -17,7 +17,7 @@ public isolated client class Listener {
         check self.externInit(serverUri, clientId, config);
     }
 
-    private isolated function externInit(string serverUri, string clientId, *ClientConfiguration config) returns Error? =
+    private isolated function externInit(string serverUri, string clientId, *ListenerConfiguration config) returns Error? =
     @java:Method {
         'class: "io.xlibb.mqtt.listener.ListenerActions"
     } external;
