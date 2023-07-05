@@ -1,0 +1,11 @@
+<FindBugsFilter>
+    <Match>
+        <Class name="io.xlibb.mqtt.listener.BServiceInvokeCallbackImpl"/>
+        <Bug pattern="DM_EXIT"/>
+    </Match>
+    <Match>
+        <Class name="io.xlibb.mqtt.listener.MqttCallbackImpl" />
+        <Method name="messageArrived"/>
+        <Bug pattern="RV_RETURN_VALUE_IGNORED" />
+    </Match>
+</FindBugsFilter>

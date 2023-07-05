@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+    mosquitto:
+        image: 'eclipse-mosquitto:latest'
+        hostname: mosquitto
+        ports:
+            - '1883:1883'
+            - '9001:9001'
+        volumes:
+            - ./mosquitto_password.txt:/mosquitto/passwd_file
+            - ./mosquitto.conf:/mosquitto/config/mosquitto.conf

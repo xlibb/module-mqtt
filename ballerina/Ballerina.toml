@@ -1,0 +1,23 @@
+[package]
+org = "xlibb"
+name = "mqtt"
+version = "0.0.1"
+authors = ["xlibb"]
+keywords = ["mqtt"]
+repository = "https://github.com/xlibb/module-mqtt"
+#license = ["Apache-2.0"]
+distribution = "2201.6.0"
+#icon = "icon.png"
+
+[[platform.java11.dependency]]
+groupId = "io.xlibb"
+artifactId = "mqtt"
+version = "0.0.1"
+path = "../native/build/libs/mqtt-native-0.0.1-SNAPSHOT.jar"
+
+# Azure dependencies
+[[platform.java11.dependency]]
+groupId = "org.eclipse.paho"
+artifactId = "org.eclipse.paho.client.mqttv3"
+version = "1.2.5"
+path = "./lib/org.eclipse.paho.client.mqttv3-1.2.5.jar"
