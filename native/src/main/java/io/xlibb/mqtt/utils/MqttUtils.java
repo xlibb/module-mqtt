@@ -15,9 +15,9 @@ import static io.xlibb.mqtt.utils.ModuleUtils.getModule;
  */
 public class MqttUtils {
 
-    public static MqttConnectOptions getMqttConnectOptions(BMap<BString, Object> clientConfiguration) {
+    public static MqttConnectOptions getMqttConnectOptions(BMap<BString, Object> configuration) {
         MqttConnectOptions options = new MqttConnectOptions();
-        Object connectionConfigObject = clientConfiguration.get(StringUtils.fromString("connectionConfig"));
+        Object connectionConfigObject = configuration.get(StringUtils.fromString("connectionConfig"));
         if (connectionConfigObject != null && connectionConfigObject instanceof BMap) {
             BMap<BString, Object> connectionConfig = (BMap<BString, Object>) connectionConfigObject;
             Object username = connectionConfig.get(StringUtils.fromString("username"));

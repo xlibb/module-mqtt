@@ -18,6 +18,11 @@ public type ClientConfiguration record {|
     ConnectionConfiguration connectionConfig?;
 |};
 
+public type ListenerConfiguration record {|
+    ConnectionConfiguration connectionConfig?;
+    boolean manualAcks = false;
+|};
+
 public type ConnectionConfiguration record {|
     string username?;
     string password?;
@@ -28,6 +33,13 @@ public type ConnectionConfiguration record {|
     boolean cleanSession?;
     string[] serverUris?;
     boolean automaticReconnect?;
+|};
+
+public type DeliveryToken record {|
+    Message message;
+    int[] grantedQos;
+    int messageId;
+    string[] topics;
 |};
 
 # The Mqtt service type.
