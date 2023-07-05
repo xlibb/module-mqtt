@@ -60,8 +60,15 @@ public class MqttUtils {
         return options;
     }
 
-    public static BError createMqttError(Exception e) {
-        BError cause = ErrorCreator.createError(e.getCause());
-        return ErrorCreator.createError(getModule(), "Error", StringUtils.fromString(e.getMessage()), cause, null);
+    public static BError createMqttError(Exception exception) {
+        BError cause = ErrorCreator.createError(exception.getCause());
+        return ErrorCreator.createError(getModule(), "Error",
+                StringUtils.fromString(exception.getMessage()), cause, null);
+    }
+
+    public static BError createMqttError(Throwable throwable) {
+        BError cause = ErrorCreator.createError(throwable);
+        return ErrorCreator.createError(getModule(), "Error",
+                StringUtils.fromString(throwable.getMessage()), cause, null);
     }
 }

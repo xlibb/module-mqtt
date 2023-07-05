@@ -2,32 +2,31 @@ package io.xlibb.mqtt.listener;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BString;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
-import java.util.UUID;
-
 import static io.xlibb.mqtt.utils.MqttUtils.createMqttError;
+import static io.xlibb.mqtt.utils.MqttUtils.getMqttConnectOptions;
 
 /**
  * Class containing the external methods of the listener.
  */
 public class ListenerActions {
 
-    public static Object externInit(BObject clientObject) {
+    public static Object externInit(BObject clientObject, BString serverUri, BString clientId,
+                                    BMap<BString, Object> clientConfiguration) {
         try {
-            IMqttClient publisher = new MqttClient("tcp://localhost:1883",
-                    UUID.randomUUID().toString(), new MemoryPersistence());
-            MqttConnectOptions options = new MqttConnectOptions();
-            options.setAutomaticReconnect(true);
-            options.setCleanSession(true);
-            options.setConnectionTimeout(10);
-            publisher.connect(options);
-            clientObject.addNativeData("clientObject", publisher);
+
+            IMqttClient subscriber = new MqttClient(serverUri.getValue(), clientId.getValue(), new MemoryPersistence());
+            MqttConnectOptions options = getMqttConnectOptions(clientConfiguration);
+            subscriber.connect(options);
+            clientObject.addNativeData("clientObject", subscriber);
         } catch (MqttException e) {
             return createMqttError(e);
         }

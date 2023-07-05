@@ -6,10 +6,12 @@ import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.xlibb.mqtt.utils.ModuleUtils;
+import io.xlibb.mqtt.utils.MqttUtils;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -34,15 +36,24 @@ public class MqttCallbackImpl implements MqttCallback {
 
     @Override
     public void connectionLost(Throwable cause) {
-
+        BError mqttError = MqttUtils.createMqttError(cause);
+        StrandMetadata metadata = getStrandMetadata("onError");
+        CountDownLatch latch = new CountDownLatch(1);
+        runtime.invokeMethodAsyncSequentially(service, "onError", null, metadata,
+                new BServiceInvokeCallbackImpl(latch), null, PredefinedTypes.TYPE_ANY, mqttError, true);
+        try {
+            latch.await(100, TimeUnit.SECONDS);
+        } catch (InterruptedException exception) {
+            exception.printStackTrace();
+        }
     }
 
     @Override
     public void messageArrived(String topic, MqttMessage message) {
         BMap<BString, Object> bMqttMessage = getBMqttMessage(message);
-        StrandMetadata metadata = getStrandMetadata("onMessageArrived");
+        StrandMetadata metadata = getStrandMetadata("onMessage");
         CountDownLatch latch = new CountDownLatch(1);
-        runtime.invokeMethodAsyncSequentially(service, "onMessageArrived", null, metadata,
+        runtime.invokeMethodAsyncSequentially(service, "onMessage", null, metadata,
                 new BServiceInvokeCallbackImpl(latch), null, PredefinedTypes.TYPE_ANY, bMqttMessage, true);
         try {
             latch.await(100, TimeUnit.SECONDS);
