@@ -3,6 +3,7 @@ package io.xlibb.mqtt.listener;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -32,6 +33,8 @@ public class ListenerActions {
             clientObject.addNativeData("clientObject", subscriber);
         } catch (MqttException e) {
             return createMqttError(e);
+        } catch (BError e) {
+            return e;
         }
         return null;
     }

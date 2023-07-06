@@ -31,18 +31,20 @@ public type ListenerConfiguration record {|
 
 # The configurations related to the connection initialization of `mqtt:Client` and `mqtt:Listener`.
 #
-# + username - The username to use for the connection
-# + password - The password to use for the connection
-# + maxReconnectDelay - The maximum delay between reconnects in milliseconds
-# + keepAliveInterval - The maximum time interval between messages sent or received in seconds
-# + maxInflight - Maximum number of messages that can be sent without receiving acknowledgments
-# + connectionTimeout - Maximum time interval in seconds the client will wait for the network connection to the MQTT server to be established
-# + cleanSession - Whether the client and server should remember state for the client across reconnects
-# + serverUris - List of serverURIs the client may connect to
+# + username - The username to use for the connection  
+# + password - The password to use for the connection  
+# + secureSocket - The configurations related to secure communication with the MQTT server
+# + maxReconnectDelay - The maximum delay between reconnects in milliseconds  
+# + keepAliveInterval - The maximum time interval between messages sent or received in seconds  
+# + maxInflight - Maximum number of messages that can be sent without receiving acknowledgments  
+# + connectionTimeout - Maximum time interval in seconds the client will wait for the network connection to the MQTT server to be established  
+# + cleanSession - Whether the client and server should remember state for the client across reconnects  
+# + serverUris - List of serverURIs the client may connect to  
 # + automaticReconnect - Whether the client will automatically attempt to reconnect to the server if the connection is lost
 public type ConnectionConfiguration record {|
     string username?;
     string password?;
+    SecureSocket secureSocket?;
     int maxReconnectDelay?;
     int keepAliveInterval?;
     int maxInflight?;
@@ -64,6 +66,34 @@ public type DeliveryToken record {|
     int messageId;
     string[] topics;
 |};
+
+# Configurations for secure communication with the MQTT server.
+#
+# + cert - Certificate file that the client trusts
+# + key - Combination of certificate and private key of the client
+# + protocol - Related protocol
+public type SecureSocket record {|
+    string cert;
+    CertKey key?;
+    Protocol protocol?;
+|};
+
+# Represents a combination of certificate, private key, and private key password if encrypted.
+#
+# + certFile - A file containing the certificate
+# + keyFile - A file containing the private key
+# + keyPassword - Password of the private key if it is encrypted
+public type CertKey record {|
+    string certFile;
+    string keyFile;
+    string keyPassword?;
+|};
+
+# Represents protocol options.
+public enum Protocol {
+    SSL,
+    TLS
+}
 
 # The MQTT service type.
 public type Service distinct service object {};
