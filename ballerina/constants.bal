@@ -1,1 +1,1 @@
-const DEFAULT_URL = "tcp://localhost:1883";
+public const DEFAULT_URL = "tcp://localhost:1883";
