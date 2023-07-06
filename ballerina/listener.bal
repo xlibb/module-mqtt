@@ -1,13 +1,16 @@
 import ballerina/jballerina.java;
 
 # Represents a MQTT listener endpoint.
-#
 public isolated client class Listener {
 
     private final string[] & readonly topics;
 
     # Creates a new `mqtt:Listener`.
     #
+    # + serverUri - The URI of the remote MQTT server
+    # + clientId - The unique client ID to identify the listener
+    # + topics - The topics to be subscribed to
+    # + return - `mqtt:Error` if an error occurs while creating the listener
     public isolated function init(string serverUri, string clientId, string|string[] topics, *ListenerConfiguration config) returns Error? {
         if topics is string {
             self.topics = [topics];
