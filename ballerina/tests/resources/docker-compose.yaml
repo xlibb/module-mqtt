@@ -11,3 +11,6 @@ services:
         volumes:
             - ./mosquitto_password.txt:/mosquitto/passwd_file
             - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+            - ./certsandkeys/ca.crt:/mosquitto/ca.crt
+            - ./certsandkeys/server.crt:/mosquitto/server.crt
+            - ./certsandkeys/server.key:/mosquitto/server.key
