@@ -8,6 +8,20 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+
 import static io.xlibb.mqtt.utils.ModuleUtils.getModule;
 
 /**
@@ -56,8 +70,34 @@ public class MqttUtils {
             if (automaticReconnect != null) {
                 options.setAutomaticReconnect((boolean) automaticReconnect);
             }
+            Object secureSocket = connectionConfig.get(StringUtils.fromString("secureSocket"));
+            if (secureSocket != null) {
+                SocketFactory socketFactory = getSocketFactory((BMap<BString, Object>) secureSocket);
+                options.setSocketFactory(socketFactory);
+            }
         }
         return options;
+    }
+
+    private static SocketFactory getSocketFactory(BMap<BString, Object> secureSocket) {
+        String certPath = secureSocket.getStringValue(StringUtils.fromString("cert")).getValue();
+        try {
+            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStore.load(null, null);
+            trustStore.setCertificateEntry("Custom CA", CertificateFactory.getInstance("X509")
+                    .generateCertificate(new FileInputStream(certPath)));
+
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init(trustStore);
+            TrustManager[] trustManagers = tmf.getTrustManagers();
+
+            SSLContext sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, trustManagers, null);
+            return sslContext.getSocketFactory();
+        } catch (IOException | CertificateException | KeyStoreException |
+                NoSuchAlgorithmException | KeyManagementException e) {
+            throw createMqttError(e);
+        }
     }
 
     public static BError createMqttError(Exception exception) {

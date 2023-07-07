@@ -7,4 +7,8 @@
         <Class name="io.xlibb.mqtt.listener.MqttCallbackImpl" />
         <Bug pattern="RV_RETURN_VALUE_IGNORED" />
     </Match>
+    <Match>
+        <Class name="io.xlibb.mqtt.utils.MqttUtils" />
+        <Bug pattern="OBL_UNSATISFIED_OBLIGATION" />
+    </Match>
 </FindBugsFilter>

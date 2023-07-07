@@ -5,11 +5,14 @@ import ballerina/uuid;
 
 string receivedMessage = "";
 
-service on new Listener(DEFAULT_URL, uuid:createType1AsString(), "mqtt/test", {
+service on new Listener("ssl://localhost:1883", uuid:createType1AsString(), "mqtt/test", {
     connectionConfig: {
         username: "ballerina",
         password: "ballerinamqtt",
-        connectionTimeout: 100
+        connectionTimeout: 100,
+        secureSocket: {
+            cert: "tests/resources/certsandkeys/ca.crt"
+        }
     }
 }) {
     remote function onMessage(Message message) returns error? {
@@ -29,11 +32,14 @@ service on new Listener(DEFAULT_URL, uuid:createType1AsString(), "mqtt/test", {
 
 @test:Config {enable: true}
 function basicPublishSubscribeTest() returns error? {
-    Client 'client = check new (DEFAULT_URL, uuid:createType1AsString(), {
+    Client 'client = check new ("ssl://localhost:1883", uuid:createType1AsString(), {
         connectionConfig: {
             username: "ballerina",
             password: "ballerinamqtt",
-            connectionTimeout: 100
+            connectionTimeout: 100,
+            secureSocket: {
+                cert: "tests/resources/certsandkeys/ca.crt"
+            }
         }
     });
     check 'client->publish("mqtt/test", {payload: "This is a test message".toBytes()});
