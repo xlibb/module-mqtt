@@ -4,6 +4,9 @@ import io.ballerina.runtime.api.values.BObject;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
+import static io.xlibb.mqtt.utils.MqttConstants.MESSAGE_ID;
+import static io.xlibb.mqtt.utils.MqttConstants.QOS;
+import static io.xlibb.mqtt.utils.MqttConstants.SUBSCRIBER;
 import static io.xlibb.mqtt.utils.MqttUtils.createMqttError;
 
 /**
@@ -12,9 +15,9 @@ import static io.xlibb.mqtt.utils.MqttUtils.createMqttError;
 public class CallerActions {
 
     public static Object complete(BObject callerObject) {
-        IMqttClient subscriber = (IMqttClient) callerObject.getNativeData("subscriber");
-        int messageId = (int) callerObject.getNativeData("messageId");
-        int qos = (int) callerObject.getNativeData("qos");
+        IMqttClient subscriber = (IMqttClient) callerObject.getNativeData(SUBSCRIBER);
+        int messageId = (int) callerObject.getNativeData(MESSAGE_ID);
+        int qos = (int) callerObject.getNativeData(QOS);
         try {
             subscriber.messageArrivedComplete(messageId, qos);
         } catch (MqttException e) {

@@ -13,6 +13,9 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
+import static io.xlibb.mqtt.utils.MqttConstants.CLIENT_OBJECT;
+import static io.xlibb.mqtt.utils.MqttConstants.MANUAL_ACKS;
+import static io.xlibb.mqtt.utils.MqttConstants.SERVICE;
 import static io.xlibb.mqtt.utils.MqttUtils.createMqttError;
 import static io.xlibb.mqtt.utils.MqttUtils.getMqttConnectOptions;
 
@@ -27,10 +30,10 @@ public class ListenerActions {
 
             IMqttClient subscriber = new MqttClient(serverUri.getValue(), clientId.getValue(), new MemoryPersistence());
             MqttConnectOptions options = getMqttConnectOptions(listenerConfiguration);
-            boolean manualAcks = listenerConfiguration.getBooleanValue(StringUtils.fromString("manualAcks"));
+            boolean manualAcks = listenerConfiguration.getBooleanValue(StringUtils.fromString(MANUAL_ACKS));
             subscriber.setManualAcks(manualAcks);
             subscriber.connect(options);
-            clientObject.addNativeData("clientObject", subscriber);
+            clientObject.addNativeData(CLIENT_OBJECT, subscriber);
         } catch (MqttException e) {
             return createMqttError(e);
         } catch (BError e) {
@@ -41,24 +44,24 @@ public class ListenerActions {
 
     public static Object externAttach(Environment environment, BObject clientObject, BObject service, Object topics) {
         clientObject.addNativeData("service", service);
-        IMqttClient subscriber = (IMqttClient) clientObject.getNativeData("clientObject");
+        IMqttClient subscriber = (IMqttClient) clientObject.getNativeData(CLIENT_OBJECT);
         subscriber.setCallback(new MqttCallbackImpl(environment.getRuntime(), service, subscriber));
         return null;
     }
 
     public static Object externDetach(BObject clientObject, BObject service) {
-        IMqttClient subscriber = (IMqttClient) clientObject.getNativeData("clientObject");
+        IMqttClient subscriber = (IMqttClient) clientObject.getNativeData(CLIENT_OBJECT);
         try {
             subscriber.disconnect();
         } catch (MqttException e) {
             return createMqttError(e);
         }
-        clientObject.addNativeData("service", null);
+        clientObject.addNativeData(SERVICE, null);
         return null;
     }
 
     public static Object externStart(BObject clientObject, BArray topics) {
-        IMqttClient subscriber = (IMqttClient) clientObject.getNativeData("clientObject");
+        IMqttClient subscriber = (IMqttClient) clientObject.getNativeData(CLIENT_OBJECT);
         try {
             subscriber.subscribe(topics.getStringArray());
         } catch (MqttException e) {
@@ -68,24 +71,24 @@ public class ListenerActions {
     }
 
     public static Object externGracefulStop(BObject clientObject) {
-        IMqttClient subscriber = (IMqttClient) clientObject.getNativeData("clientObject");
+        IMqttClient subscriber = (IMqttClient) clientObject.getNativeData(CLIENT_OBJECT);
         try {
             subscriber.disconnect();
         } catch (MqttException e) {
             return createMqttError(e);
         }
-        clientObject.addNativeData("service", null);
+        clientObject.addNativeData(SERVICE, null);
         return null;
     }
 
     public static Object externImmediateStop(BObject clientObject) {
-        IMqttClient subscriber = (IMqttClient) clientObject.getNativeData("clientObject");
+        IMqttClient subscriber = (IMqttClient) clientObject.getNativeData(CLIENT_OBJECT);
         try {
             subscriber.disconnectForcibly();
         } catch (MqttException e) {
             return createMqttError(e);
         }
-        clientObject.addNativeData("service", null);
+        clientObject.addNativeData(SERVICE, null);
         return null;
     }
 

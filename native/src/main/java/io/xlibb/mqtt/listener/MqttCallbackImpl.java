@@ -26,6 +26,21 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static io.xlibb.mqtt.utils.ModuleUtils.getModule;
+import static io.xlibb.mqtt.utils.MqttConstants.CALLER;
+import static io.xlibb.mqtt.utils.MqttConstants.DUPLICATE;
+import static io.xlibb.mqtt.utils.MqttConstants.GRANTED_QOS;
+import static io.xlibb.mqtt.utils.MqttConstants.MESSAGE;
+import static io.xlibb.mqtt.utils.MqttConstants.MESSAGE_ID;
+import static io.xlibb.mqtt.utils.MqttConstants.ONCOMPLETE;
+import static io.xlibb.mqtt.utils.MqttConstants.ONERROR;
+import static io.xlibb.mqtt.utils.MqttConstants.ONMESSAGE;
+import static io.xlibb.mqtt.utils.MqttConstants.PAYLOAD;
+import static io.xlibb.mqtt.utils.MqttConstants.QOS;
+import static io.xlibb.mqtt.utils.MqttConstants.RECORD_DELIVERY_TOKEN;
+import static io.xlibb.mqtt.utils.MqttConstants.RECORD_MESSAGE;
+import static io.xlibb.mqtt.utils.MqttConstants.RETAINED;
+import static io.xlibb.mqtt.utils.MqttConstants.SUBSCRIBER;
+import static io.xlibb.mqtt.utils.MqttConstants.TOPICS;
 
 /**
  * Class containing the callback of Mqtt subscriber.
@@ -63,9 +78,9 @@ public class MqttCallbackImpl implements MqttCallback {
             invokeOnError(bError);
             return;
         }
-        StrandMetadata metadata = getStrandMetadata("onComplete");
+        StrandMetadata metadata = getStrandMetadata(ONCOMPLETE);
         CountDownLatch latch = new CountDownLatch(1);
-        runtime.invokeMethodAsyncSequentially(service, "onComplete", null, metadata,
+        runtime.invokeMethodAsyncSequentially(service, ONCOMPLETE, null, metadata,
                 new BServiceInvokeCallbackImpl(latch), null, PredefinedTypes.TYPE_ANY, bMqttMessage, true);
         try {
             latch.await(100, TimeUnit.SECONDS);
@@ -76,19 +91,19 @@ public class MqttCallbackImpl implements MqttCallback {
 
     private void invokeOnMessage(MqttMessage message) {
         BMap<BString, Object> bMqttMessage = getBMqttMessage(message);
-        StrandMetadata metadata = getStrandMetadata("onMessage");
+        StrandMetadata metadata = getStrandMetadata(ONMESSAGE);
         CountDownLatch latch = new CountDownLatch(1);
         boolean callerExists = isCallerAvailable();
         if (callerExists) {
-            BObject callerObject = ValueCreator.createObjectValue(getModule(), "Caller");
-            callerObject.addNativeData("subscriber", subscriber);
-            callerObject.addNativeData("messageId", message.getId());
-            callerObject.addNativeData("qos", message.getQos());
-            runtime.invokeMethodAsyncSequentially(service, "onMessage", null, metadata,
+            BObject callerObject = ValueCreator.createObjectValue(getModule(), CALLER);
+            callerObject.addNativeData(SUBSCRIBER, subscriber);
+            callerObject.addNativeData(MESSAGE_ID, message.getId());
+            callerObject.addNativeData(QOS, message.getQos());
+            runtime.invokeMethodAsyncSequentially(service, ONMESSAGE, null, metadata,
                     new BServiceInvokeCallbackImpl(latch), null, PredefinedTypes.TYPE_ANY,
                     bMqttMessage, true, callerObject, true);
         } else {
-            runtime.invokeMethodAsyncSequentially(service, "onMessage", null, metadata,
+            runtime.invokeMethodAsyncSequentially(service, ONMESSAGE, null, metadata,
                     new BServiceInvokeCallbackImpl(latch), null, PredefinedTypes.TYPE_ANY, bMqttMessage, true);
         }
         try {
@@ -106,7 +121,7 @@ public class MqttCallbackImpl implements MqttCallback {
     private Optional<RemoteMethodType> getOnMessageMethodType() {
         RemoteMethodType[] methodTypes = ((ServiceType) service.getOriginalType()).getRemoteMethods();
         for (RemoteMethodType methodType: methodTypes) {
-            if (methodType.getName().equals("onMessage")) {
+            if (methodType.getName().equals(ONMESSAGE)) {
                 return Optional.of(methodType);
             }
         }
@@ -114,9 +129,9 @@ public class MqttCallbackImpl implements MqttCallback {
     }
 
     private void invokeOnError(BError bError) {
-        StrandMetadata metadata = getStrandMetadata("onError");
+        StrandMetadata metadata = getStrandMetadata(ONERROR);
         CountDownLatch latch = new CountDownLatch(1);
-        runtime.invokeMethodAsyncSequentially(service, "onError", null, metadata,
+        runtime.invokeMethodAsyncSequentially(service, ONERROR, null, metadata,
                 new BServiceInvokeCallbackImpl(latch), null, PredefinedTypes.TYPE_ANY, bError, true);
         try {
             latch.await(100, TimeUnit.SECONDS);
@@ -126,24 +141,24 @@ public class MqttCallbackImpl implements MqttCallback {
     }
 
     private BMap<BString, Object> getBMqttMessage(MqttMessage message) {
-        BMap<BString, Object> bMessage = ValueCreator.createRecordValue(getModule(), "Message");
-        bMessage.put(StringUtils.fromString("payload"), ValueCreator.createArrayValue(message.getPayload()));
-        bMessage.put(StringUtils.fromString("messageId"), message.getId());
-        bMessage.put(StringUtils.fromString("qos"), message.getQos());
-        bMessage.put(StringUtils.fromString("retained"), message.isRetained());
-        bMessage.put(StringUtils.fromString("duplicate"), message.isDuplicate());
+        BMap<BString, Object> bMessage = ValueCreator.createRecordValue(getModule(), RECORD_MESSAGE);
+        bMessage.put(StringUtils.fromString(PAYLOAD), ValueCreator.createArrayValue(message.getPayload()));
+        bMessage.put(StringUtils.fromString(MESSAGE_ID), message.getId());
+        bMessage.put(StringUtils.fromString(QOS), message.getQos());
+        bMessage.put(StringUtils.fromString(RETAINED), message.isRetained());
+        bMessage.put(StringUtils.fromString(DUPLICATE), message.isDuplicate());
         return bMessage;
     }
 
     private BMap<BString, Object> getMqttDeliveryToken(IMqttDeliveryToken token) throws MqttException {
         MqttMessage mqttMessage = token.getMessage();
         BMap<BString, Object> bMessage = getBMqttMessage(mqttMessage);
-        BMap<BString, Object> bDeliveryToken = ValueCreator.createRecordValue(getModule(), "DeliveryToken");
-        bDeliveryToken.put(StringUtils.fromString("message"), bMessage);
+        BMap<BString, Object> bDeliveryToken = ValueCreator.createRecordValue(getModule(), RECORD_DELIVERY_TOKEN);
+        bDeliveryToken.put(MESSAGE, bMessage);
         long[] qosArray = Arrays.stream(token.getGrantedQos()).asLongStream().toArray();
-        bDeliveryToken.put(StringUtils.fromString("grantedQos"), ValueCreator.createArrayValue(qosArray));
-        bDeliveryToken.put(StringUtils.fromString("messageId"), token.getMessageId());
-        bDeliveryToken.put(StringUtils.fromString("topics"), StringUtils.fromStringArray(token.getTopics()));
+        bDeliveryToken.put(GRANTED_QOS, ValueCreator.createArrayValue(qosArray));
+        bDeliveryToken.put(StringUtils.fromString(MESSAGE_ID), token.getMessageId());
+        bDeliveryToken.put(TOPICS, StringUtils.fromStringArray(token.getTopics()));
         return bDeliveryToken;
     }
 
