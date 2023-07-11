@@ -11,7 +11,7 @@ distribution = "2201.6.0"
 groupId = "io.xlibb"
 artifactId = "mqtt-native"
 version = "0.1.4"
-path = "../native/build/libs/mqtt-native-0.1.4-SNAPSHOT.jar"
+path = "../native/build/libs/mqtt-native-0.1.4.jar"
 
 # Azure dependencies
 [[platform.java11.dependency]]
