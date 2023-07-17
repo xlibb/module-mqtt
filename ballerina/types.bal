@@ -83,10 +83,7 @@ public type DeliveryToken record {|
 # + protocol - Related protocol
 public type SecureSocket record {|
     crypto:TrustStore|string cert?;
-    record {|
-        crypto:KeyStore keyStore;
-        string keyPassword?;
-    |}|CertKey key?;
+    crypto:KeyStore|CertKey key?;
     record {|
         Protocol name;
         string version;

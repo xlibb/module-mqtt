@@ -118,19 +118,19 @@ public class MqttUtils {
             Security.addProvider(new BouncyCastleProvider());
             if (bCert instanceof BString) {
                 tmf = getTrustManagerFactory((BString) bCert);
-                if (keyRecord != null) {
-                    if (keyRecord.containsKey(CERT_FILE)) {
-                        BString certFile = keyRecord.get(CERT_FILE);
-                        BString keyFile = keyRecord.get(KEY_FILE);
-                        BString keyPassword = keyRecord.getStringValue(KEY_PASSWORD);
-                        kmf = getKeyManagerFactory(certFile, keyFile, keyPassword);
-                    } else {
-                        kmf = getKeyManagerFactory(keyRecord);
-                    }
-                }
             } else {
                 BMap<BString, BString> trustStore = (BMap<BString, BString>) bCert;
                 tmf = getTrustManagerFactory(trustStore);
+            }
+            if (keyRecord != null) {
+                if (keyRecord.containsKey(CERT_FILE)) {
+                    BString certFile = keyRecord.get(CERT_FILE);
+                    BString keyFile = keyRecord.get(KEY_FILE);
+                    BString keyPassword = keyRecord.getStringValue(KEY_PASSWORD);
+                    kmf = getKeyManagerFactory(certFile, keyFile, keyPassword);
+                } else {
+                    kmf = getKeyManagerFactory(keyRecord);
+                }
             }
             SSLContext sslContext = SSLContext.getInstance(contextProtocol);
             if (Objects.nonNull(kmf)) {
