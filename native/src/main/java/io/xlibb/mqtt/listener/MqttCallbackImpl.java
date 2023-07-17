@@ -14,11 +14,13 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.xlibb.mqtt.utils.ModuleUtils;
 import io.xlibb.mqtt.utils.MqttUtils;
-import org.eclipse.paho.client.mqttv3.IMqttClient;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.mqttv5.client.IMqttToken;
+import org.eclipse.paho.mqttv5.client.MqttCallback;
+import org.eclipse.paho.mqttv5.client.MqttClient;
+import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
+import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -49,17 +51,23 @@ public class MqttCallbackImpl implements MqttCallback {
 
     private final Runtime runtime;
     private final BObject service;
-    private final IMqttClient subscriber;
+    private final MqttClient subscriber;
 
-    public MqttCallbackImpl(Runtime runtime, BObject service, IMqttClient subscriber) {
+    public MqttCallbackImpl(Runtime runtime, BObject service, MqttClient subscriber) {
         this.runtime = runtime;
         this.service = service;
         this.subscriber = subscriber;
     }
 
     @Override
-    public void connectionLost(Throwable cause) {
-        BError mqttError = MqttUtils.createMqttError(cause);
+    public void disconnected(MqttDisconnectResponse disconnectResponse) {
+        BError mqttError = MqttUtils.createMqttError(disconnectResponse.getException());
+        invokeOnError(mqttError);
+    }
+
+    @Override
+    public void mqttErrorOccurred(MqttException exception) {
+        BError mqttError = MqttUtils.createMqttError(exception);
         invokeOnError(mqttError);
     }
 
@@ -69,7 +77,17 @@ public class MqttCallbackImpl implements MqttCallback {
     }
 
     @Override
-    public void deliveryComplete(IMqttDeliveryToken token) {
+    public void connectComplete(boolean reconnect, String serverURI) {
+
+    }
+
+    @Override
+    public void authPacketArrived(int reasonCode, MqttProperties properties) {
+
+    }
+
+    @Override
+    public void deliveryComplete(IMqttToken token) {
         BMap<BString, Object> bMqttMessage;
         try {
             bMqttMessage = getMqttDeliveryToken(token);
@@ -150,7 +168,7 @@ public class MqttCallbackImpl implements MqttCallback {
         return bMessage;
     }
 
-    private BMap<BString, Object> getMqttDeliveryToken(IMqttDeliveryToken token) throws MqttException {
+    private BMap<BString, Object> getMqttDeliveryToken(IMqttToken token) throws MqttException {
         MqttMessage mqttMessage = token.getMessage();
         BMap<BString, Object> bMessage = getBMqttMessage(mqttMessage);
         BMap<BString, Object> bDeliveryToken = ValueCreator.createRecordValue(getModule(), RECORD_DELIVERY_TOKEN);
