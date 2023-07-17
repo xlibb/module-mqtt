@@ -22,7 +22,7 @@ plugins {
 }
 
 ext.ballerinaLangVersion = project.ballerinaLangVersion
-ext.pahoMqttVersion = project.pahoMqttVersion
+ext.pahoMqtt5Version = project.pahoMqtt5Version
 
 allprojects {
     group = project.group

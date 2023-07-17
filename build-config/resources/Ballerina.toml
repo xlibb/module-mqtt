@@ -16,6 +16,12 @@ path = "../native/build/libs/mqtt-native-@project.version@.jar"
 # Azure dependencies
 [[platform.java11.dependency]]
 groupId = "org.eclipse.paho"
-artifactId = "org.eclipse.paho.client.mqttv3"
+artifactId = "org.eclipse.paho.mqttv5.client"
 version = "@paho.mqtt.version@"
-path = "./lib/org.eclipse.paho.client.mqttv3-@paho.mqtt.version@.jar"
+path = "./lib/org.eclipse.paho.mqttv5.client-@paho.mqtt.version@.jar"
+
+[[platform.java11.dependency]]
+groupId = "org.bouncycastle"
+artifactId = "bcpkix-jdk15on"
+version = "@bouncy.castle.version@"
+path = "./lib/bcpkix-jdk15on-@bouncy.castle.version@.jar"
