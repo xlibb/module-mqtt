@@ -35,7 +35,7 @@ function basicPublishSubscribeTest() returns error? {
     check stopListenerAndClient('listener, 'client);
 
     lock {
-        test:assertTrue(receivedMessages.indexOf(message) > -1);
+        test:assertTrue(receivedMessages.indexOf(message) != ());
     }
 }
 
@@ -52,7 +52,7 @@ function basicPublishSubscribeWithAuthTest() returns error? {
 
     check stopListenerAndClient('listener, 'client);
 
-    test:assertTrue(receivedMessages.indexOf(message) > -1);
+    test:assertTrue(receivedMessages.indexOf(message) != ());
 }
 
 @test:Config {enable: true}
@@ -68,7 +68,7 @@ function basicPublishSubscribeWithTLSTest() returns error? {
 
     check stopListenerAndClient('listener, 'client);
 
-    test:assertTrue(receivedMessages.indexOf(message) > -1);
+    test:assertTrue(receivedMessages.indexOf(message) != ());
 }
 
 @test:Config {enable: true}
@@ -84,7 +84,7 @@ function basicPublishSubscribeWithMTLSTest() returns error? {
 
     check stopListenerAndClient('listener, 'client);
 
-    test:assertTrue(receivedMessages.indexOf(message) > -1);
+    test:assertTrue(receivedMessages.indexOf(message) != ());
 }
 
 @test:Config {enable: true}
@@ -100,7 +100,7 @@ function basicPublishSubscribeWithAuthAndMTLSTest() returns error? {
 
     check stopListenerAndClient('listener, 'client);
 
-    test:assertTrue(receivedMessages.indexOf(message) > -1);
+    test:assertTrue(receivedMessages.indexOf(message) != ());
 }
 
 @test:Config {enable: true}
@@ -118,8 +118,8 @@ function subscribeToMultipleTopicsTest() returns error? {
 
     check stopListenerAndClient('listener, 'client);
 
-    test:assertTrue(receivedMessages.indexOf(message1) > -1);
-    test:assertTrue(receivedMessages.indexOf(message2) > -1);
+    test:assertTrue(receivedMessages.indexOf(message1) != ());
+    test:assertTrue(receivedMessages.indexOf(message2) != ());
 }
 
 @test:Config {enable: true}
@@ -135,7 +135,7 @@ function subscribeToSubscriptionTest() returns error? {
 
     check stopListenerAndClient('listener, 'client);
 
-    test:assertTrue(receivedMessages.indexOf(message) > -1);
+    test:assertTrue(receivedMessages.indexOf(message) != ());
 }
 
 @test:Config {enable: true}
@@ -153,8 +153,8 @@ function subscribeToMultipleSubscriptionsTest() returns error? {
 
     check stopListenerAndClient('listener, 'client);
 
-    test:assertTrue(receivedMessages.indexOf(message1) > -1);
-    test:assertTrue(receivedMessages.indexOf(message2) > -1);
+    test:assertTrue(receivedMessages.indexOf(message1) != ());
+    test:assertTrue(receivedMessages.indexOf(message2) != ());
 }
 
 @test:Config {enable: true}
@@ -170,7 +170,7 @@ function publishSubscribeWithMTLSTrustKeyStoresTest() returns error? {
 
     check stopListenerAndClient('listener, 'client);
 
-    test:assertTrue(receivedMessages.indexOf(message) > -1);
+    test:assertTrue(receivedMessages.indexOf(message) != ());
 }
 
 @test:Config {enable: true}
@@ -200,7 +200,7 @@ function subscribeWithManualAcks() returns error? {
 
     check stopListenerAndClient('listener, 'client);
 
-    test:assertTrue(receivedMessages.indexOf(message) > -1);
+    test:assertTrue(receivedMessages.indexOf(message) != ());
 }
 
 @test:Config {enable: true}
@@ -215,4 +215,143 @@ function closeWithoutDisconnectTest() returns error? {
     } else {
         test:assertFail("Expected an error when closing without disconnecting");
     }
+}
+
+@test:Config {enable: true}
+function clientIsConnectedTest() returns error? {
+    Client 'client = check new (NO_AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), {connectionConfig: mtlsConnConfig});
+    string message = "Test message for checking if client is connected";
+    check 'client->publish("mqtt/unrelated", {payload: message.toBytes()});
+    boolean isConnected = check 'client->isConnected();
+    test:assertTrue(isConnected);
+    check 'client->disconnect();
+    isConnected = check 'client->isConnected();
+    test:assertFalse(isConnected);
+}
+
+@test:Config {enable: true}
+function clientReconnectTest() returns error? {
+    Client 'client = check new (NO_AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), {connectionConfig: mtlsConnConfig});
+    string message = "Test message for reconnecting with the server";
+    check 'client->publish("mqtt/unrelated", {payload: message.toBytes()});
+    boolean isConnected = check 'client->isConnected();
+    test:assertTrue(isConnected);
+    check 'client->disconnect();
+    isConnected = check 'client->isConnected();
+    test:assertFalse(isConnected);
+    check 'client->reconnect();
+    runtime:sleep(10);
+    isConnected = check 'client->isConnected();
+    test:assertTrue(isConnected);
+}
+
+@test:Config {enable: true}
+function invalidUrlClientTest() returns error? {
+    Client|Error result = new (INVALID_ENDPOINT, uuid:createType1AsString(), {connectionConfig: mtlsConnConfig});
+    if result is Error {
+        test:assertEquals(result.message(), string `no NetworkModule installed for scheme "http" of URI "http://localhost:8888"`);
+    } else {
+        test:assertFail("Expected an error");
+    }
+}
+
+@test:Config {enable: true}
+function invalidUrlListenerTest() returns error? {
+    Listener|Error result = new (INVALID_ENDPOINT, uuid:createType1AsString(), "mqtt/unrelated", {connectionConfig: mtlsConnConfig});
+    if result is Error {
+        test:assertEquals(result.message(), string `no NetworkModule installed for scheme "http" of URI "http://localhost:8888"`);
+    } else {
+        test:assertFail("Expected an error");
+    }
+}
+
+@test:Config {enable: true}
+function invalidCertPathClientTest() returns error? {
+    Client|Error result = new (NO_AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), {
+        connectionConfig: {
+            secureSocket: {
+                cert: SERVER_CERT_PATH,
+                key: {
+                    path: INCORRECT_KEYSTORE_PATH,
+                    password: KEYSTORE_PASSWORD
+                }
+            }
+        }
+    });
+    if result is Error {
+        test:assertEquals(result.message(), string `tests/resources/certsandkeys/invalid-keystore.p12 (No such file or directory)`);
+    } else {
+        test:assertFail("Expected an error");
+    }
+}
+
+@test:Config {enable: true}
+function invalidCertPathListenerTest() returns error? {
+    Listener|Error result = new (NO_AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), "mqtt/unrelated", {
+        connectionConfig: {
+            secureSocket: {
+                cert: SERVER_CERT_PATH,
+                key: {
+                    path: INCORRECT_KEYSTORE_PATH,
+                    password: KEYSTORE_PASSWORD
+                }
+            }
+        }
+    });
+    if result is Error {
+        test:assertEquals(result.message(), string `tests/resources/certsandkeys/invalid-keystore.p12 (No such file or directory)`);
+    } else {
+        test:assertFail("Expected an error");
+    }
+}
+
+@test:Config {enable: true}
+function listenerGracefulStopTest() returns error? {
+    Listener 'listener = check new (AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), "mqtt/gracefulstoptopic", {connectionConfig: authMtlsConnConfig});
+    check 'listener.attach(basicService);
+    check 'listener.'start();
+
+    Client 'client = check new (AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), {connectionConfig: authMtlsConnConfig});
+    string message = "Test message 1 for graceful stop";
+    check 'client->publish("mqtt/gracefulstoptopic", {payload: message.toBytes()});
+    runtime:sleep(1);
+    test:assertTrue(receivedMessages.indexOf(message) != ());
+    check 'listener.gracefulStop();
+    message = "Test message 2 for graceful stop";
+    check 'client->publish("mqtt/gracefulstoptopic", {payload: message.toBytes()});
+    test:assertTrue(receivedMessages.indexOf(message) == ());
+}
+
+@test:Config {enable: true}
+function listenerImmediateStopTest() returns error? {
+    Listener 'listener = check new (AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), "mqtt/immediatestoptopic", {connectionConfig: authMtlsConnConfig});
+    check 'listener.attach(basicService);
+    check 'listener.'start();
+
+    Client 'client = check new (AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), {connectionConfig: authMtlsConnConfig});
+    string message = "Test message 1 for immediate stop";
+    check 'client->publish("mqtt/immediatestoptopic", {payload: message.toBytes()});
+    runtime:sleep(1);
+    test:assertTrue(receivedMessages.indexOf(message) != ());
+    check 'listener.immediateStop();
+    message = "Test message 2 for immediate stop";
+    check 'client->publish("mqtt/immediatestoptopic", {payload: message.toBytes()});
+    test:assertTrue(receivedMessages.indexOf(message) == ());
+}
+
+@test:Config {enable: true}
+function listenerDetachTest() returns error? {
+    Listener 'listener = check new (AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), "mqtt/detachtopic", {connectionConfig: authMtlsConnConfig});
+    check 'listener.attach(basicService);
+    check 'listener.'start();
+
+    Client 'client = check new (AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), {connectionConfig: authMtlsConnConfig});
+    string message = "Test message 1 for detach";
+    check 'client->publish("mqtt/detachtopic", {payload: message.toBytes()});
+    runtime:sleep(1);
+    test:assertTrue(receivedMessages.indexOf(message) != ());
+    check 'listener.detach(basicService);
+    message = "Test message 2 for detach";
+    check 'client->publish("mqtt/detachtopic", {payload: message.toBytes()});
+    test:assertTrue(receivedMessages.indexOf(message) == ());
 }

@@ -5,6 +5,7 @@ const NO_AUTH_ENCRYPTED_ENDPOINT = "ssl://localhost:8883";
 const NO_AUTH_MTLS_ENDPOINT = "ssl://localhost:8884";
 const NO_AUTH_EXPIRED_ENDPOINT = "ssl://localhost:8887";
 const AUTH_MTLS_ENDPOINT = "ssl://localhost:8888";
+const INVALID_ENDPOINT = "http://localhost:8888";
 
 const AUTH_USERNAME = "ballerina";
 const AUTH_PASSWORD = "ballerinamqtt";
