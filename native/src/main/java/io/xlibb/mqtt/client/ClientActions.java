@@ -31,10 +31,10 @@ public class ClientActions {
             MqttConnectionOptions options = getMqttConnectOptions(clientConfiguration);
             publisher.connect(options);
             clientObject.addNativeData(CLIENT_OBJECT, publisher);
-        } catch (MqttException e) {
-            return createMqttError(e);
         } catch (BError e) {
             return e;
+        } catch (Exception e) {
+            return createMqttError(e);
         }
         return null;
     }

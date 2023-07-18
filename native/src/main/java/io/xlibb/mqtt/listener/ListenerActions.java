@@ -35,10 +35,10 @@ public class ListenerActions {
             subscriber.setManualAcks(manualAcks);
             subscriber.connect(options);
             clientObject.addNativeData(CLIENT_OBJECT, subscriber);
-        } catch (MqttException e) {
-            return createMqttError(e);
         } catch (BError e) {
             return e;
+        } catch (Exception e) {
+            return createMqttError(e);
         }
         return null;
     }
