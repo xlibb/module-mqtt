@@ -23,6 +23,28 @@ const TRUSTSTORE_PASSWORD = "ballerina";
 const KEYSTORE_PATH = "tests/resources/certsandkeys/ballerinaKeystore.p12";
 const KEYSTORE_PASSWORD = "ballerina";
 
+final ConnectionConfiguration authConnConfig = {
+    username: AUTH_USERNAME,
+    password: AUTH_PASSWORD
+};
+
+final ConnectionConfiguration tlsConnConfig = {
+    secureSocket: {
+        cert: SERVER_CERT_PATH
+    }
+};
+
+final ConnectionConfiguration mtlsConnConfig = {
+    secureSocket: {
+        cert: SERVER_CERT_PATH,
+        key: {
+            certFile: CLIENT_CERT_PATH,
+            keyFile: CLIENT_KEY_PATH,
+            keyPassword: KEY_PASSWORD
+        }
+    }
+};
+
 final ConnectionConfiguration authMtlsConnConfig = {
     username: AUTH_USERNAME,
     password: AUTH_PASSWORD,
