@@ -5,21 +5,7 @@ import ballerina/uuid;
 
 string receivedMessage = "";
 
-service on new Listener("ssl://localhost:8888", uuid:createType1AsString(), "mqtt/test", {
-    connectionConfig: {
-        username: "ballerina",
-        password: "ballerinamqtt",
-        connectionTimeout: 100,
-        secureSocket: {
-            cert: "tests/resources/certsandkeys/server.crt",
-            key: {
-                certFile: "tests/resources/certsandkeys/client.crt",
-                keyFile: "tests/resources/certsandkeys/client.key",
-                keyPassword: "ballerina"
-            }
-        }
-    }
-}) {
+Service basicService = service object {
     remote function onMessage(Message message) returns error? {
         log:printInfo(check string:fromBytes(message.payload));
         receivedMessage = check string:fromBytes(message.payload);
@@ -33,26 +19,26 @@ service on new Listener("ssl://localhost:8888", uuid:createType1AsString(), "mqt
         log:printInfo("Message delivered " + token.messageId.toString());
         log:printInfo(check string:fromBytes(token.message.payload));
     }
-}
+};
 
 @test:Config {enable: true}
 function basicPublishSubscribeTest() returns error? {
-    Client 'client = check new ("ssl://localhost:8888", uuid:createType1AsString(), {
-        connectionConfig: {
-            username: "ballerina",
-            password: "ballerinamqtt",
-            connectionTimeout: 100,
-            secureSocket: {
-                cert: "tests/resources/certsandkeys/server.crt",
-                key: {
-                    certFile: "tests/resources/certsandkeys/client.crt",
-                    keyFile: "tests/resources/certsandkeys/client.key",
-                    keyPassword: "ballerina"
-                }
-            }
-        }
-    });
-    check 'client->publish("mqtt/test", {payload: "This is a test message".toBytes()});
+    Listener 'listener = check new (AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), "mqtt/basictest", {connectionConfig: authMtlsConnConfig});
+    check 'listener.attach(basicService);
+    check 'listener.'start();
+
+    Client 'client = check new (AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), {connectionConfig: authMtlsConnConfig});
+    string message = "This is a test message for basic pub sub test";
+    check 'client->publish("mqtt/basictest", {payload: message.toBytes()});
     runtime:sleep(1);
-    test:assertEquals(receivedMessage, "This is a test message");
+
+    check stopListenerAndClient('listener, 'client);
+
+    test:assertEquals(receivedMessage, message);
+}
+
+function stopListenerAndClient(Listener 'listener, Client 'client) returns error? {
+    check 'client->disconnect();
+    check 'client->close();
+    check 'listener.gracefulStop();
 }
