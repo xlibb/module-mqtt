@@ -35,7 +35,7 @@ function basicPublishSubscribeTest() returns error? {
     check stopListenerAndClient('listener, 'client);
 
     lock {
-    test:assertTrue(receivedMessages.indexOf(message) > -1);
+        test:assertTrue(receivedMessages.indexOf(message) > -1);
     }
 }
 
@@ -157,8 +157,62 @@ function subscribeToMultipleSubscriptionsTest() returns error? {
     test:assertTrue(receivedMessages.indexOf(message2) > -1);
 }
 
-function stopListenerAndClient(Listener 'listener, Client 'client) returns error? {
-    check 'client->disconnect();
-    check 'client->close();
-    check 'listener.gracefulStop();
+@test:Config {enable: true}
+function publishSubscribeWithMTLSTrustKeyStoresTest() returns error? {
+    Listener 'listener = check new (NO_AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), "mqtt/trustkeystorestopic", {connectionConfig: mtlsConnConfig});
+    check 'listener.attach(basicService);
+    check 'listener.'start();
+
+    Client 'client = check new (NO_AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), {connectionConfig: mtlsConnConfig});
+    string message = "Test message for mtls with trust and key stores";
+    check 'client->publish("mqtt/trustkeystorestopic", {payload: message.toBytes()});
+    runtime:sleep(1);
+
+    check stopListenerAndClient('listener, 'client);
+
+    test:assertTrue(receivedMessages.indexOf(message) > -1);
+}
+
+@test:Config {enable: true}
+function subscribeWithManualAcks() returns error? {
+    Listener 'listener = check new (NO_AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), "mqtt/manualackstopic", {connectionConfig: mtlsConnConfig, manualAcks: true});
+    Service manualAcksService = service object {
+        remote function onMessage(Message message, Caller caller) returns error? {
+            log:printInfo(check string:fromBytes(message.payload));
+            receivedMessages.push(check string:fromBytes(message.payload));
+            check caller->complete();
+        }
+        remote function onError(Error err) returns error? {
+            log:printError("Error occured ", err);
+        }
+        remote function onCompleted(DeliveryToken token) returns error? {
+            log:printInfo("Message delivered " + token.messageId.toString());
+            log:printInfo(check string:fromBytes(token.message.payload));
+        }
+    };
+    check 'listener.attach(manualAcksService);
+    check 'listener.'start();
+
+    Client 'client = check new (NO_AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), {connectionConfig: mtlsConnConfig});
+    string message = "Test message for manual acks";
+    check 'client->publish("mqtt/manualackstopic", {payload: message.toBytes()});
+    runtime:sleep(1);
+
+    check stopListenerAndClient('listener, 'client);
+
+    test:assertTrue(receivedMessages.indexOf(message) > -1);
+}
+
+@test:Config {enable: true}
+function closeWithoutDisconnectTest() returns error? {
+    Client 'client = check new (NO_AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), {connectionConfig: mtlsConnConfig});
+    string message = "Test message for closing without disconnect";
+    check 'client->publish("mqtt/unrelated", {payload: message.toBytes()});
+    Error? err = 'client->close();
+    if err is Error {
+        test:assertEquals(err.message(), "Client is connected");
+        test:assertEquals(err.detail().reasonCode, 32100);
+    } else {
+        test:assertFail("Expected an error when closing without disconnecting");
+    }
 }

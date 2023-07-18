@@ -17,11 +17,14 @@ const CLIENT_CERT_PATH = "tests/resources/certsandkeys/client.crt";
 const CLIENT_KEY_PATH = "tests/resources/certsandkeys/client.key";
 const KEY_PASSWORD = "ballerina";
 
-const TRUSTSTORE_PATH = "tests/resources/certsandkeys/ballerinaTruststore.p12";
+const TRUSTSTORE_PATH = "tests/resources/certsandkeys/client-trustore.jks";
 const TRUSTSTORE_PASSWORD = "ballerina";
 
-const KEYSTORE_PATH = "tests/resources/certsandkeys/ballerinaKeystore.p12";
+const KEYSTORE_PATH = "tests/resources/certsandkeys/client-keystore.p12";
 const KEYSTORE_PASSWORD = "ballerina";
+
+const INCORRECT_KEYSTORE_PATH = "tests/resources/certsandkeys/invalid-keystore.p12";
+const INCORRECT_KEYSTORE_PASSWORD = "password";
 
 final ConnectionConfiguration authConnConfig = {
     username: AUTH_USERNAME,
@@ -45,6 +48,17 @@ final ConnectionConfiguration mtlsConnConfig = {
     }
 };
 
+final ConnectionConfiguration mtlsWithTrustKeyStoreConnConfig = {
+    secureSocket: {
+        cert: {path: TRUSTSTORE_PATH, password: TRUSTSTORE_PASSWORD},
+        key: {
+            path: KEYSTORE_PATH,
+            password: KEYSTORE_PASSWORD
+        },
+        protocol: {name: TLS, version: "1.2"}
+    }
+};
+
 final ConnectionConfiguration authMtlsConnConfig = {
     username: AUTH_USERNAME,
     password: AUTH_PASSWORD,
@@ -57,3 +71,9 @@ final ConnectionConfiguration authMtlsConnConfig = {
         }
     }
 };
+
+function stopListenerAndClient(Listener 'listener, Client 'client) returns error? {
+    check 'client->disconnect();
+    check 'client->close();
+    check 'listener.gracefulStop();
+}
