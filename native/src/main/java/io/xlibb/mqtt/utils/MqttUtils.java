@@ -1,6 +1,7 @@
 package io.xlibb.mqtt.utils;
 
 import io.ballerina.runtime.api.creators.ErrorCreator;
+import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
@@ -9,6 +10,7 @@ import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.crypto.nativeimpl.Decode;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
+import org.eclipse.paho.mqttv5.common.MqttException;
 
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
@@ -216,14 +218,16 @@ public class MqttUtils {
     }
 
     public static BError createMqttError(Exception exception) {
-        BError cause = ErrorCreator.createError(exception.getCause());
-        return ErrorCreator.createError(getModule(), ERROR_NAME,
-                StringUtils.fromString(exception.getMessage()), cause, null);
-    }
-
-    public static BError createMqttError(Throwable throwable) {
-        BError cause = ErrorCreator.createError(throwable);
-        return ErrorCreator.createError(getModule(), ERROR_NAME,
-                StringUtils.fromString(throwable.getMessage()), cause, null);
+        Throwable cause = exception.getCause();
+        BMap<BString, Object> errorDetailMap = ValueCreator.createRecordValue(getModule(), "ErrorDetails");
+        if (exception instanceof MqttException) {
+            errorDetailMap.put(StringUtils.fromString("reasonCode"), ((MqttException) exception).getReasonCode());
+        }
+        if (cause != null) {
+            return ErrorCreator.createError(getModule(), ERROR_NAME, StringUtils.fromString(exception.getMessage()),
+                    ErrorCreator.createError(exception.getCause()), errorDetailMap);
+        }
+        return ErrorCreator.createError(getModule(), ERROR_NAME, StringUtils.fromString(exception.getMessage()),
+                null, errorDetailMap);
     }
 }
