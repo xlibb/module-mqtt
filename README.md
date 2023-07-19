@@ -1,6 +1,12 @@
 # Ballerina MQTT Library
 
-This package provides an implementation to interact with MQTT servers via MQTT client and listener.
+[![Build](https://github.com/xlibb/module-mqtt/actions/workflows/build-timestamped-master.yml/badge.svg)](https://github.com/xlibb/module-mqtt/actions/workflows/build-timestamped-master.yml)
+[![codecov](https://codecov.io/gh/xlibb/module-mqtt/branch/master/graph/badge.svg)](https://codecov.io/gh/xlibb/module-mqtt)
+[![Trivy](https://github.com/xlibb/module-mqtt/actions/workflows/trivy-scan.yml/badge.svg)](https://github.com/xlibb/module-mqtt/actions/workflows/trivy-scan.yml)
+[![GraalVM Check](https://github.com/xlibb/module-mqtt/actions/workflows/build-with-bal-test-graalvm.yml/badge.svg)](https://github.com/xlibb/module-mqtt/actions/workflows/build-with-bal-test-graalvm.yml)
+[![GitHub Last Commit](https://img.shields.io/github/last-commit/xlibb/module-mqtt.svg)](https://github.com/xlibb/module-mqtt/commits/master)
+
+This Library provides an implementation to interact with MQTT servers via MQTT client and listener.
 
 MQTT is a lightweight, publish-subscribe, machine to machine network protocol for message queue/message queuing service.
 
