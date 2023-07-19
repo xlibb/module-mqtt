@@ -382,3 +382,56 @@ function serviceWithoutOnMessageTest() returns error? {
 
     test:assertEquals(errorMessage, "method onMessage not found");
 }
+
+@test:Config {enable: true}
+function clientListenerConfigTest() returns error? {
+    Listener 'listener = check new (AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), "mqtt/allconnconfigtopic", {
+        connectionConfig: {
+            username: AUTH_USERNAME,
+            password: AUTH_PASSWORD,
+            automaticReconnect: false,
+            cleanSession: true,
+            connectionTimeout: 10,
+            keepAliveInterval: 10,
+            maxReconnectDelay: 10,
+            secureSocket: {
+                cert: SERVER_CERT_PATH,
+                key: {
+                    path: KEYSTORE_PATH,
+                    password: KEYSTORE_PASSWORD
+                }
+            },
+            serverUris: ["ssl://localhost:8889", "ssl://localhost:8890"]
+        },
+        manualAcks: false
+    });
+    check 'listener.attach(basicService);
+    check 'listener.'start();
+
+    Client 'client = check new (AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), {
+        connectionConfig: {
+            username: AUTH_USERNAME,
+            password: AUTH_PASSWORD,
+            automaticReconnect: false,
+            cleanSession: true,
+            connectionTimeout: 10,
+            keepAliveInterval: 10,
+            maxReconnectDelay: 10,
+            secureSocket: {
+                cert: SERVER_CERT_PATH,
+                key: {
+                    path: KEYSTORE_PATH,
+                    password: KEYSTORE_PASSWORD
+                }
+            },
+            serverUris: ["ssl://localhost:8889", "ssl://localhost:8890"]
+        }
+    });
+    string message = "Test message for service with all connection configs";
+    check 'client->publish("mqtt/allconnconfigtopic", {payload: message.toBytes()});
+    runtime:sleep(1);
+
+    check stopListenerAndClient('listener, 'client);
+
+    test:assertTrue(receivedMessages.indexOf(message) != ());
+}
