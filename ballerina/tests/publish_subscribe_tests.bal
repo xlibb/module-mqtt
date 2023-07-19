@@ -159,11 +159,11 @@ function subscribeToMultipleSubscriptionsTest() returns error? {
 
 @test:Config {enable: true}
 function publishSubscribeWithMTLSTrustKeyStoresTest() returns error? {
-    Listener 'listener = check new (NO_AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), "mqtt/trustkeystorestopic", {connectionConfig: mtlsConnConfig});
+    Listener 'listener = check new (NO_AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), "mqtt/trustkeystorestopic", {connectionConfig: mtlsWithTrustKeyStoreConnConfig});
     check 'listener.attach(basicService);
     check 'listener.'start();
 
-    Client 'client = check new (NO_AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), {connectionConfig: mtlsConnConfig});
+    Client 'client = check new (NO_AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), {connectionConfig: mtlsWithTrustKeyStoreConnConfig});
     string message = "Test message for mtls with trust and key stores";
     check 'client->publish("mqtt/trustkeystorestopic", {payload: message.toBytes()});
     runtime:sleep(1);
@@ -243,6 +243,7 @@ function clientReconnectTest() returns error? {
     runtime:sleep(10);
     isConnected = check 'client->isConnected();
     test:assertTrue(isConnected);
+    check stopListenerAndClient('client = 'client);
 }
 
 @test:Config {enable: true}
@@ -320,6 +321,7 @@ function listenerGracefulStopTest() returns error? {
     message = "Test message 2 for graceful stop";
     check 'client->publish("mqtt/gracefulstoptopic", {payload: message.toBytes()});
     test:assertTrue(receivedMessages.indexOf(message) == ());
+    check stopListenerAndClient('client = 'client);
 }
 
 @test:Config {enable: true}
@@ -337,6 +339,7 @@ function listenerImmediateStopTest() returns error? {
     message = "Test message 2 for immediate stop";
     check 'client->publish("mqtt/immediatestoptopic", {payload: message.toBytes()});
     test:assertTrue(receivedMessages.indexOf(message) == ());
+    check stopListenerAndClient('client = 'client);
 }
 
 @test:Config {enable: true}
@@ -354,4 +357,28 @@ function listenerDetachTest() returns error? {
     message = "Test message 2 for detach";
     check 'client->publish("mqtt/detachtopic", {payload: message.toBytes()});
     test:assertTrue(receivedMessages.indexOf(message) == ());
+    check stopListenerAndClient('client = 'client);
+}
+
+@test:Config {enable: true}
+function serviceWithoutOnMessageTest() returns error? {
+    Listener 'listener = check new (NO_AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), "mqtt/noonmessagetopic", {connectionConfig: mtlsConnConfig, manualAcks: true});
+    string errorMessage = "";
+    Service noOnMsgService = service object {
+        remote function onError(Error err) returns error? {
+            log:printError("Error occured ", err);
+            errorMessage = err.message();
+        }
+    };
+    check 'listener.attach(noOnMsgService);
+    check 'listener.'start();
+
+    Client 'client = check new (NO_AUTH_MTLS_ENDPOINT, uuid:createType1AsString(), {connectionConfig: mtlsConnConfig});
+    string message = "Test message for service without onmessage method";
+    check 'client->publish("mqtt/noonmessagetopic", {payload: message.toBytes()});
+    runtime:sleep(1);
+
+    check stopListenerAndClient('listener, 'client);
+
+    test:assertEquals(errorMessage, "method onMessage not found");
 }

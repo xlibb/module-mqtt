@@ -73,8 +73,12 @@ final ConnectionConfiguration authMtlsConnConfig = {
     }
 };
 
-function stopListenerAndClient(Listener 'listener, Client 'client) returns error? {
-    check 'client->disconnect();
-    check 'client->close();
-    check 'listener.gracefulStop();
+function stopListenerAndClient(Listener? 'listener = (), Client? 'client = ()) returns error? {
+    if 'client != () {
+        check 'client->disconnect();
+        check 'client->close();
+    }
+    if 'listener != () {
+        check 'listener.gracefulStop();
+    }
 }
