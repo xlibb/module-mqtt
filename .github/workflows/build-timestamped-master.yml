@@ -3,16 +3,15 @@ name: Build
 on:
   push:
     branches:
-      - master
+      - main
     paths-ignore:
       - '*.md'
-      - 'load-tests/**'
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'ballerina-platform'
+    if: github.repository_owner == 'xlibb'
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
