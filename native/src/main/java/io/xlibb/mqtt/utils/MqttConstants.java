@@ -30,7 +30,7 @@ public class MqttConstants {
     public static final BString KEY_PASSWORD = StringUtils.fromString("keyPassword");
     public static final BString KEY_STORE_PASSWORD = StringUtils.fromString("password");
     public static final BString KEY_STORE_PATH = StringUtils.fromString("path");
-    public static final BString PROTOCOL = StringUtils.fromString("protocol");
+    public static final BString PROTOCOL_NAME = StringUtils.fromString("name");
     public static final BString PROTOCOL_VERSION = StringUtils.fromString("version");
 
     public static final String ERROR_NAME = "Error";

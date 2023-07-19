@@ -47,7 +47,7 @@ import static io.xlibb.mqtt.utils.MqttConstants.MAX_RECONNECT_DELAY;
 import static io.xlibb.mqtt.utils.MqttConstants.NATIVE_DATA_PRIVATE_KEY;
 import static io.xlibb.mqtt.utils.MqttConstants.NATIVE_DATA_PUBLIC_KEY_CERTIFICATE;
 import static io.xlibb.mqtt.utils.MqttConstants.PASSWORD;
-import static io.xlibb.mqtt.utils.MqttConstants.PROTOCOL;
+import static io.xlibb.mqtt.utils.MqttConstants.PROTOCOL_NAME;
 import static io.xlibb.mqtt.utils.MqttConstants.PROTOCOL_VERSION;
 import static io.xlibb.mqtt.utils.MqttConstants.SECURE_SOCKET;
 import static io.xlibb.mqtt.utils.MqttConstants.SERVER_URIS;
@@ -107,13 +107,13 @@ public class MqttUtils {
     private static SocketFactory getSocketFactory(BMap<BString, Object> secureSocket) {
         Object bCert = secureSocket.get(CERT);
         BMap<BString, BString> keyRecord = (BMap<BString, BString>) secureSocket.getMapValue(KEY);
-        BMap protocol = secureSocket.getMapValue(PROTOCOL);
+        BMap protocol = secureSocket.getMapValue(PROTOCOL_NAME);
         String contextProtocol = DEFAULT_TLS_PROTOCOL;
         KeyManagerFactory kmf = null;
         TrustManagerFactory tmf;
         if (Objects.nonNull(protocol)) {
             String version = protocol.getStringValue(PROTOCOL_VERSION).getValue();
-            String protocolName = protocol.getStringValue(PROTOCOL).getValue();
+            String protocolName = protocol.getStringValue(PROTOCOL_NAME).getValue();
             contextProtocol = protocolName + "v" + version;
         }
         try {

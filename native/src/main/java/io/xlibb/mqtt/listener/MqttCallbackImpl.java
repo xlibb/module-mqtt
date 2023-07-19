@@ -84,6 +84,11 @@ public class MqttCallbackImpl implements MqttCallback {
         StrandMetadata metadata = getStrandMetadata(ONMESSAGE);
         CountDownLatch latch = new CountDownLatch(1);
         boolean callerExists = isCallerAvailable();
+        boolean onMessageImplemented = isOnMessageImplemented();
+        if (!onMessageImplemented) {
+            invokeOnError(MqttUtils.createMqttError(new NoSuchMethodException("method onMessage not found")));
+            return;
+        }
         if (callerExists) {
             BObject callerObject = ValueCreator.createObjectValue(getModule(), CALLER);
             callerObject.addNativeData(SUBSCRIBER, subscriber);
@@ -103,22 +108,12 @@ public class MqttCallbackImpl implements MqttCallback {
         }
     }
 
-    private boolean isCallerAvailable() {
-        Optional<RemoteMethodType> onMessageMethodType = getOnMessageMethodType();
-        return onMessageMethodType.isPresent() && onMessageMethodType.get().getType().getParameters().length == 2;
-    }
-
-    private Optional<RemoteMethodType> getOnMessageMethodType() {
-        RemoteMethodType[] methodTypes = ((ServiceType) service.getOriginalType()).getRemoteMethods();
-        for (RemoteMethodType methodType: methodTypes) {
-            if (methodType.getName().equals(ONMESSAGE)) {
-                return Optional.of(methodType);
-            }
-        }
-        return Optional.empty();
-    }
-
     private void invokeOnError(BError bError) {
+        boolean onErrorImplemented = isOnErrorImplemented();
+        if (!onErrorImplemented) {
+            bError.printStackTrace();
+            return;
+        }
         StrandMetadata metadata = getStrandMetadata(ONERROR);
         CountDownLatch latch = new CountDownLatch(1);
         runtime.invokeMethodAsyncSequentially(service, ONERROR, null, metadata,
@@ -128,6 +123,31 @@ public class MqttCallbackImpl implements MqttCallback {
         } catch (InterruptedException exception) {
             exception.printStackTrace();
         }
+    }
+
+    private boolean isOnErrorImplemented() {
+        Optional<RemoteMethodType> onErrorMethodType = getRemoteMethodType(ONERROR);
+        return onErrorMethodType.isPresent();
+    }
+
+    private boolean isOnMessageImplemented() {
+        Optional<RemoteMethodType> onMessageMethodType = getRemoteMethodType(ONMESSAGE);
+        return onMessageMethodType.isPresent();
+    }
+
+    private boolean isCallerAvailable() {
+        Optional<RemoteMethodType> onMessageMethodType = getRemoteMethodType(ONMESSAGE);
+        return onMessageMethodType.isPresent() && onMessageMethodType.get().getType().getParameters().length == 2;
+    }
+
+    private Optional<RemoteMethodType> getRemoteMethodType(String methodName) {
+        RemoteMethodType[] methodTypes = ((ServiceType) service.getOriginalType()).getRemoteMethods();
+        for (RemoteMethodType methodType: methodTypes) {
+            if (methodType.getName().equals(methodName)) {
+                return Optional.of(methodType);
+            }
+        }
+        return Optional.empty();
     }
 
     private BMap<BString, Object> getBMqttMessage(MqttMessage message) {
