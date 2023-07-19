@@ -1,3 +1,5 @@
+import ballerina/crypto;
+
 # An MQTT message holds the application payload and other metadata.
 #
 # + payload - The payload of the message as a byte array
@@ -29,6 +31,15 @@ public type ListenerConfiguration record {|
     boolean manualAcks = false;
 |};
 
+# An MQTTSubscription which contains the topic and the QoS level.
+#
+# + topic - The topic to subscribe to
+# + qos - The QoS level to subscribe at
+public type Subscription record {|
+    string topic;
+    int qos = 1;
+|};
+
 # The configurations related to the connection initialization of `mqtt:Client` and `mqtt:Listener`.
 #
 # + username - The username to use for the connection  
@@ -36,8 +47,7 @@ public type ListenerConfiguration record {|
 # + secureSocket - The configurations related to secure communication with the MQTT server
 # + maxReconnectDelay - The maximum delay between reconnects in milliseconds  
 # + keepAliveInterval - The maximum time interval between messages sent or received in seconds  
-# + maxInflight - Maximum number of messages that can be sent without receiving acknowledgments  
-# + connectionTimeout - Maximum time interval in seconds the client will wait for the network connection to the MQTT server to be established  
+# + connectionTimeout - Maximum time interval in seconds the client will wait for the network connection to the MQTT server to be established
 # + cleanSession - Whether the client and server should remember state for the client across reconnects  
 # + serverUris - List of serverURIs the client may connect to  
 # + automaticReconnect - Whether the client will automatically attempt to reconnect to the server if the connection is lost
@@ -47,7 +57,6 @@ public type ConnectionConfiguration record {|
     SecureSocket secureSocket?;
     int maxReconnectDelay?;
     int keepAliveInterval?;
-    int maxInflight?;
     int connectionTimeout?;
     boolean cleanSession?;
     string[] serverUris?;
@@ -73,9 +82,12 @@ public type DeliveryToken record {|
 # + key - Combination of certificate and private key of the client
 # + protocol - Related protocol
 public type SecureSocket record {|
-    string cert;
-    CertKey key?;
-    Protocol protocol?;
+    crypto:TrustStore|string cert?;
+    crypto:KeyStore|CertKey key?;
+    record {|
+        Protocol name;
+        string version;
+    |} protocol?;
 |};
 
 # Represents a combination of certificate, private key, and private key password if encrypted.

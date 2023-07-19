@@ -3,19 +3,35 @@ import ballerina/jballerina.java;
 # Represents a MQTT listener endpoint.
 public isolated client class Listener {
 
-    private final string[] & readonly topics;
+    private final Subscription[] & readonly mqttSubscriptions;
 
     # Creates a new `mqtt:Listener`.
     #
     # + serverUri - The URI of the remote MQTT server
     # + clientId - The unique client ID to identify the listener
-    # + topics - The topics to be subscribed to
+    # + subscriptions - The topics to be subscribed to
     # + return - `mqtt:Error` if an error occurs while creating the listener
-    public isolated function init(string serverUri, string clientId, string|string[] topics, *ListenerConfiguration config) returns Error? {
-        if topics is string {
-            self.topics = [topics];
+    public isolated function init(string serverUri, string clientId, string|string[]|Subscription|Subscription[] subscriptions, *ListenerConfiguration config) returns Error? {
+        if subscriptions is Subscription {
+            self.mqttSubscriptions = [subscriptions.cloneReadOnly()];
+        } else if subscriptions is string {
+            self.mqttSubscriptions = [{
+                topic: subscriptions,
+                qos: 1
+            }];
+        } else if subscriptions is string[] {
+            Subscription[] mqttSubscriptions = [];
+            foreach string topic in subscriptions {
+                mqttSubscriptions.push({
+                    topic: topic,
+                    qos: 1
+                });
+            }
+            self.mqttSubscriptions = mqttSubscriptions.cloneReadOnly();
+        } else if subscriptions is Subscription[] {
+            self.mqttSubscriptions = subscriptions.cloneReadOnly();
         } else {
-            self.topics = topics.cloneReadOnly();
+            panic error("Invalid topics provided");
         }
         check self.externInit(serverUri, clientId, config);
     }
@@ -32,10 +48,10 @@ public isolated client class Listener {
     #
     # + return - A `error` if an error is encountered while starting the server or else `()`
     public isolated function 'start() returns error? {
-        check self.externStart(self.topics);
+        check self.externStart(self.mqttSubscriptions);
     };
 
-    private isolated function externStart(string[] topics) returns error? =
+    private isolated function externStart(Subscription[] topics) returns error? =
     @java:Method {
         'class: "io.xlibb.mqtt.listener.ListenerActions"
     } external;

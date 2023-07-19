@@ -52,17 +52,20 @@ configurations {
 
 dependencies {
     /* Azure dependencies */
-    externalJars(group: 'org.eclipse.paho', name: 'org.eclipse.paho.client.mqttv3', version: "${pahoMqttVersion}") {
+    externalJars(group: 'org.eclipse.paho', name: 'org.eclipse.paho.mqttv5.client', version: "${pahoMqtt5Version}") {
+        transitive = false
+    }
+    externalJars(group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: "${bouncycastleVersion}") {
         transitive = false
     }
 }
 
 task updateTomlFiles {
     doLast {
-        def stdlibDependentPahoMqttVersion = project.pahoMqttVersion
         def newConfig = ballerinaTomlFilePlaceHolder.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
-        newConfig = newConfig.replace("@paho.mqtt.version@", stdlibDependentPahoMqttVersion)
+        newConfig = newConfig.replace("@paho.mqtt.version@", project.pahoMqtt5Version)
+        newConfig = newConfig.replace("@bouncy.castle.version@", project.bouncycastleVersion)
         ballerinaTomlFile.text = newConfig
     }
 }
