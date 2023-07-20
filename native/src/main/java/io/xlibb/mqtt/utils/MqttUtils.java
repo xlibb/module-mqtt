@@ -30,7 +30,7 @@ import static io.xlibb.mqtt.utils.ModuleUtils.getModule;
 import static io.xlibb.mqtt.utils.MqttConstants.AUTOMATIC_RECONNECT;
 import static io.xlibb.mqtt.utils.MqttConstants.CERT;
 import static io.xlibb.mqtt.utils.MqttConstants.CERT_FILE;
-import static io.xlibb.mqtt.utils.MqttConstants.CLEAN_SESSION;
+import static io.xlibb.mqtt.utils.MqttConstants.CLEAN_START;
 import static io.xlibb.mqtt.utils.MqttConstants.CONNECTION_CONFIGURATION;
 import static io.xlibb.mqtt.utils.MqttConstants.CONNECTION_TIMEOUT;
 import static io.xlibb.mqtt.utils.MqttConstants.CRYPTO_TRUSTSTORE_PASSWORD;
@@ -83,9 +83,9 @@ public class MqttUtils {
             if (connectionTimeout != null) {
                 options.setConnectionTimeout(((Long) connectionTimeout).intValue());
             }
-            Object cleanSession = connectionConfig.get(CLEAN_SESSION);
-            if (cleanSession != null) {
-                options.setCleanStart((boolean) cleanSession);
+            Object cleanStart = connectionConfig.get(CLEAN_START);
+            if (cleanStart != null) {
+                options.setCleanStart((boolean) cleanStart);
             }
             Object serverUris = connectionConfig.get(SERVER_URIS);
             if (serverUris != null) {

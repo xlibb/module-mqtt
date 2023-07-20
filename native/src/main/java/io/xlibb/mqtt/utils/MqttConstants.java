@@ -14,15 +14,12 @@ public class MqttConstants {
     public static final BString MAX_RECONNECT_DELAY = StringUtils.fromString("maxReconnectDelay");
     public static final BString KEEP_ALIVE_INTERVAL = StringUtils.fromString("keepAliveInterval");
     public static final BString CONNECTION_TIMEOUT = StringUtils.fromString("connectionTimeout");
-    public static final BString CLEAN_SESSION = StringUtils.fromString("cleanSession");
+    public static final BString CLEAN_START = StringUtils.fromString("cleanStart");
     public static final BString SERVER_URIS = StringUtils.fromString("serverUris");
     public static final BString AUTOMATIC_RECONNECT = StringUtils.fromString("automaticReconnect");
     public static final BString SECURE_SOCKET = StringUtils.fromString("secureSocket");
     public static final BString CERT = StringUtils.fromString("cert");
     public static final BString KEY = StringUtils.fromString("key");
-    public static final BString MESSAGE = StringUtils.fromString("message");
-    public static final BString GRANTED_QOS = StringUtils.fromString("grantedQos");
-    public static final BString TOPICS = StringUtils.fromString("topics");
     public static final BString TOPIC = StringUtils.fromString("topic");
     public static final BString BQOS = StringUtils.fromString("qos");
     public static final BString CERT_FILE = StringUtils.fromString("certFile");

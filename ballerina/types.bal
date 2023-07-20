@@ -48,7 +48,7 @@ public type Subscription record {|
 # + maxReconnectDelay - The maximum delay between reconnects in milliseconds  
 # + keepAliveInterval - The maximum time interval between messages sent or received in seconds  
 # + connectionTimeout - Maximum time interval in seconds the client will wait for the network connection to the MQTT server to be established
-# + cleanSession - Whether the client and server should remember state for the client across reconnects  
+# + cleanStart - Whether the client and server should remember state for the client across reconnects
 # + serverUris - List of serverURIs the client may connect to  
 # + automaticReconnect - Whether the client will automatically attempt to reconnect to the server if the connection is lost
 public type ConnectionConfiguration record {|
@@ -58,7 +58,7 @@ public type ConnectionConfiguration record {|
     int maxReconnectDelay?;
     int keepAliveInterval?;
     int connectionTimeout?;
-    boolean cleanSession?;
+    boolean cleanStart?;
     string[] serverUris?;
     boolean automaticReconnect?;
 |};
