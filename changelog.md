@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 ### Added
 - [Add mTLS support](https://github.com/ballerina-platform/ballerina-standard-library/issues/4636)
+- [Add `reasonCode` to `mqtt:Error`](https://github.com/ballerina-platform/ballerina-standard-library/issues/4636)
+
+### Changed
+- [Update MQTT client to `mqttv5`](https://github.com/ballerina-platform/ballerina-standard-library/issues/4636)
+- [Update `mqtt:Listener` to support `string|string[]|Subscription|Subscription[]`](https://github.com/ballerina-platform/ballerina-standard-library/issues/4636)
+
+### Removed
+- [Remove `maxInflight` from `mqtt:ConnectionConfiguration`](https://github.com/ballerina-platform/ballerina-standard-library/issues/4636)
 
 ## [0.1.4] - 2023-07-11
 ### Added
